@@ -11,14 +11,10 @@ class WebhooksSubscriptionApi
 {
     public const SUBSCRIBE = 'subscribe';
 
-    private $clientId;
-    private $secret;
     private $guzzleClient;
 
-    public function __construct(string $clientId, string $secret, Client $guzzleClient = null)
+    public function __construct(HelixGuzzleClient $guzzleClient = null)
     {
-        $this->clientId = $clientId;
-        $this->secret = $secret;
         $this->guzzleClient = $guzzleClient ?? new HelixGuzzleClient($clientId);
     }
 
@@ -44,7 +40,7 @@ class WebhooksSubscriptionApi
     {
         $headers = [
             'Authorization' => sprintf('Bearer %s', $bearer),
-            'Client-ID' => $this->clientId,
+            'Client-ID' => $this->guzzleClient->getClientId(),
         ];
 
         $body = [
@@ -52,7 +48,7 @@ class WebhooksSubscriptionApi
             'hub.mode' => self::SUBSCRIBE,
             'hub.topic' => $topic,
             'hub.lease_seconds' => $leaseSeconds,
-            'hub.secret' => $this->secret,
+            'hub.secret' => $this->guzzleClient->getClientSecret(),
         ];
 
         $this->guzzleClient->post('webhooks/hub', [
